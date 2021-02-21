@@ -5,4 +5,17 @@
 # for a specific domain.
 ################################################################################
 
+################################################################################
+# FUNCTIONS
+################################################################################
 
+dns_help() {
+  cat <<- EOF
+dnsme: dnsme [DOMAIN]... [NAMESERVER]... [OPTION]...
+Show DNS information for the specified domain.
+
+  -g, --geoip   Provide GeoIP information from ip-api.com along with DNS information.
+  -h, --help    Show this help section.
+EOF
+}
+dns_help
