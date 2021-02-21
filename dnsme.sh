@@ -18,4 +18,8 @@ Show DNS information for the specified domain.
   -h, --help    Show this help section.
 EOF
 }
-dns_help
+
+dns_parse_domain() {
+  _domain="$(echo "$1" | sed -e 's+https\?://++')"
+  _top_domain="$(echo "$_domain" | rev | cut -d '.' -f1-2 | rev)"
+}
