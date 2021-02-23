@@ -9,7 +9,7 @@
 # VARIABLES
 ################################################################################
 
-_dns_record_type=(NS CNAME TXT SRV AAAA SOA)
+_dns_record_types=(NS CNAME TXT SRV AAAA SOA)
 
 ################################################################################
 # FUNCTIONS
@@ -23,11 +23,12 @@ Show DNS information for the specified domain.
   -r, --resolver  Select specific resolver for the query.
   -g, --geoip     Provide GeoIP information from ip-api.com along with DNS information.
   -h, --help      Show this help section.
+  -w, --whois     Print whois information for the domain.
 EOF
 }
 
 dns_parse_domain() {
-  _domain="$(echo "$1" | sed -e 's+https\?://++')"
+  _domain="${1/http*\/\//}"
   _top_domain="$(echo "$_domain" | rev | cut -d '.' -f1-2 | rev)"
 }
 
@@ -35,7 +36,27 @@ dns_parse_resolver() {
   _dns_resolver="$(1:-8.8.8.8)"
 }
 
-geoip_lookup() {
-  curl "http://ip-api.com/line/"$_url"?fields=query,country,countryCode,regionName,timezone,isp,org"
+dns_lookup() {
+  echo -e "=== A RECORDS ===\n"
+  dig @"$_dns_resolver" "$_domain" +short
+
+  echo -e "=== MX RECORDS ===\n"
+  dig @"$_dns_resolver" "$_domain" mx +short
+
+  echo -e "=== OTHER RECORDS ===\n"
+  for _dns_type in "${_dns_record_types[@]}"; do
+    echo -e "=== $_dns_type RECORDS \n"
+    dig @"_dns_resolver" "$_domain" "$_dns_type" +short
+  done
 }
 
+geoip_lookup() {
+  curl "http://ip-api.com/line/$_domain?fields=query,country,countryCode,regionName,timezone,isp,org"
+}
+
+################################################################################
+# 
+################################################################################
+
+dns_parse_domain $1
+echo $_domain
