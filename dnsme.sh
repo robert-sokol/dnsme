@@ -34,4 +34,8 @@ dns_parse_domain() {
 dns_parse_resolver() {
   _dns_resolver="$(1:-8.8.8.8)"
 }
-  
+
+geoip_lookup() {
+  curl "http://ip-api.com/line/"$_url"?fields=query,country,countryCode,regionName,timezone,isp,org"
+}
+
