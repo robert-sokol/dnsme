@@ -22,13 +22,13 @@ Show DNS information for the specified domain.
   -d, --domain    Select the domain for the query.
   -r, --resolver  Select specific resolver for the query.
   -g, --geoip     Provide GeoIP information from ip-api.com along with DNS information.
-  -h, --help      Show this help section.
   -w, --whois     Print whois information for the domain.
+  -h, --help      Show this help section.
 EOF
 }
 
 dns_parse_domain() {
-  _domain="${1#*\/\/}"
+  _domain="${1#*\/\/}" #strip protocol prefix if any.
   _top_domain="$(echo "$_domain" | rev | cut -d '.' -f1-2 | rev)"
 }
 
@@ -37,13 +37,17 @@ dns_parse_resolver() {
 }
 
 dns_lookup() {
-  echo -e "=== A RECORDS ===\n"
-  dig @"$_dns_resolver" "$_domain" +short
+  echo -e "\n=== A RECORDS ===\n"
+  _A_record="$(dig @"$_dns_resolver" "$_domain" +short)"
+  echo "$_A_record"
 
-  echo -e "=== MX RECORDS ===\n"
+  echo -e "\n=== MX RECORDS ===\n"
   dig @"$_dns_resolver" "$_domain" mx +short
 
-  echo -e "=== OTHER RECORDS ===\n"
+  echo -e "\n=== PTR RECORDS ===\n"
+  dig -x "$_A_record" +short
+
+  echo -e "\n=== OTHER RECORDS ===\n"
   for _dns_type in "${_dns_record_types[@]}"; do
     echo -e "=== $_dns_type RECORDS \n"
     dig @"_dns_resolver" "$_domain" "$_dns_type" +short
@@ -55,5 +59,4 @@ geoip_lookup() {
 }
 
 ################################################################################
-#
-################################################################################
+
