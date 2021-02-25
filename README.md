@@ -9,7 +9,7 @@ You can also just download the script in any other way, like:
 `wget https://github.com/robert-sokol/dnsme/blob/main/dnsme.sh`  
 
 ### Prerequisites
-curl 
+curl  
 whois  
 dig  
 
