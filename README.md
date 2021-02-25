@@ -4,12 +4,12 @@ for a specific domain.
 
 ## Getting started
 
-To clone the repo, just run `git clone https://github.com/robert-sokol/dnsme.git`.
-You can also just download the script in any other way, like:
-`wget https://github.com/robert-sokol/dnsme/blob/main/dnsme.sh`
+To clone the repo, just run `git clone https://github.com/robert-sokol/dnsme.git`.  
+You can also just download the script in any other way, like:  
+`wget https://github.com/robert-sokol/dnsme/blob/main/dnsme.sh`  
 
 ### Prerequisites
-curl
-whois
-dig
+curl 
+whois  
+dig  
 
