@@ -10,6 +10,7 @@
 ################################################################################
 
 _dns_record_types=(NS CNAME TXT SRV AAAA SOA)
+_dns_resolver=8.8.8.8
 
 ################################################################################
 # FUNCTIONS
@@ -33,7 +34,7 @@ dns_parse_domain() {
 }
 
 dns_parse_resolver() {
-  _dns_resolver="$(1:-8.8.8.8)"
+  _dns_resolver="$1"
 }
 
 dns_lookup() {
@@ -47,10 +48,9 @@ dns_lookup() {
   echo -e "\n=== PTR RECORDS ===\n"
   dig -x "$_A_record" +short
 
-  echo -e "\n=== OTHER RECORDS ===\n"
   for _dns_type in "${_dns_record_types[@]}"; do
-    echo -e "=== $_dns_type RECORDS \n"
-    dig @"_dns_resolver" "$_domain" "$_dns_type" +short
+    echo -e "\n=== $_dns_type RECORDS ===\n"
+    dig @"$_dns_resolver" "$_domain" "$_dns_type" +short
   done
 }
 
@@ -58,5 +58,60 @@ geoip_lookup() {
   curl "http://ip-api.com/line/$_domain?fields=query,country,countryCode,regionName,timezone,isp,org"
 }
 
+dns_parse_options() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      
+      -d|--domain)
+        if [[ "$2" == *.* ]]; then
+          dns_parse_domain "$2"
+        else
+          echo "$2 is not a valid domain, exiting." && exit 1
+        fi
+        shift 2
+      ;;
+
+      -r|--resolver)
+        if [[ "$2" == *.* || "$2" =~ ^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
+          dns_parse_resolver "$2"
+        else
+          echo "$2 is not a valid domain or IP, exiting." && exit 1
+        fi
+        shift 2
+      ;;
+
+      -g|--geoip)
+        _geoip=true
+        shift
+      ;;
+
+      -w|--whois)
+        _whois=true
+        shift
+      ;;
+      
+      -h|--help)
+        dns_help
+        exit 0
+      ;;
+
+      *)
+        echo -e "$1 is not a valid argument, exiting.\n"
+        dns_help && exit 1
+      ;;
+    esac
+  done
+}
+
 ################################################################################
 
+dns_parse_options "$@"
+dns_lookup
+if [[ "$_geoip" == true ]]; then
+  echo -e "\n=== GEOIP INFORMATION ===\n"
+  geoip_lookup
+fi
+if [[ "$_whois" == true ]]; then
+  echo -e "\n=== WHOIS INFORMATION ===\n"
+  whois "$_top_domain"
+fi
